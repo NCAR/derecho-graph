@@ -94,3 +94,7 @@ circo -y -Tsvg -O derecho.desc
 
 # Post process SVG to move overlapping node labels
 julia -- svg_pp.jl
+
+# move the graph to the docs folder to view on GH pages
+mv derecho.desc.pp.svg docs/.
+
