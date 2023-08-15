@@ -56,7 +56,7 @@ for g1 in $sgroups; do
    fi
    for g2 in $rem_groups; do
       if [ $g1 != $g2 ]; then
-         echo "$g1 -- $g2 [penwidth=2, color=red];" >> derecho.desc
+         echo "$g1 -- $g2 [penwidth=8, color=red];" >> derecho.desc
       fi
    done
 done

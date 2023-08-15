@@ -12,7 +12,7 @@ function svg_pp()
 	lines=readlines(ifile)
    close(ifile)
    # open new SVG file for writing
-   ofile=open("docs/derecho.desc.pp.svg","w")
+   ofile=open("derecho.desc.tmp.svg","w")
    ### regular expressions used to find nodes and edges
    # used to pull 2 points out of the bezier curve representing a linear graph edge
    # between a node and a switch
@@ -21,7 +21,7 @@ function svg_pp()
                       C(-?[0-9]+\.?[0-9]*,-?[0-9]+\.?[0-9]*)\s+"x
    # used to pull points out of the bezier curve representing a linear graph
    # edge between two switch groups
-   sg2sg_rexp=r"<path\s+.+\s+stroke=\"red\"\s+stroke-width=\"2\"\s+d=\"
+   sg2sg_rexp=r"<path\s+.+\s+stroke=\"red\"\s+stroke-width=\"8\"\s+d=\"
                       M(-?[0-9]+\.?[0-9]*,-?[0-9]+\.?[0-9]*)
                       C(-?[0-9]+\.?[0-9]*,-?[0-9]+\.?[0-9]*)\s+
                        (-?[0-9]+\.?[0-9]*,-?[0-9]+\.?[0-9]*)\s+
@@ -137,10 +137,10 @@ function svg_pp()
    close(ofile)
 
    # now make a 2nd pass
-   ifile=open("docs/derecho.desc.pp.svg")
+   ifile=open("derecho.desc.tmp.svg")
    lines=readlines(ifile)
    close(ifile)
-   ofile=open("docs/derecho.desc.pp2.svg","w")
+   ofile=open("docs/derecho.desc.pp.svg","w")
    for (i,l) in enumerate(lines)
       sg2sg_edge_m=match(sg2sg_rexp,l)
       if(sg2sg_edge_m!=nothing)
@@ -150,7 +150,7 @@ function svg_pp()
          sg1_coords=sg_new_coords[sg_names.captures[1]]
          sg2_coords=sg_new_coords[sg_names.captures[2]]
          # line between new switchgroups
-         new_edge="<path fill=\"none\" stroke=\"red\" stroke-width=\"2\" d=\"M$(sg1_coords[1]),$(sg1_coords[2])L$(sg2_coords[1]),$(sg2_coords[2])\"/>"
+         new_edge="<path fill=\"none\" stroke=\"red\" stroke-width=\"8\" d=\"M$(sg1_coords[1]),$(sg1_coords[2])L$(sg2_coords[1]),$(sg2_coords[2])\"/>"
          write(ofile,new_edge*"\n")      
       else
          write(ofile,l*"\n")
