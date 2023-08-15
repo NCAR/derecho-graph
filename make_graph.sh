@@ -39,7 +39,7 @@ done
 # logical switch group connectors
 for g in $lsgroups; do
    gl=`echo $g | cut -c 4-`
-   echo "$g [root=true, shape=ellipse, color=brown, style=filled, fillcolor=white label=\"$gl\"];" >> derecho.desc
+   echo "$g [root=true, shape=ellipse, color=black, style=filled, fillcolor=white label=\"$gl\"];" >> derecho.desc
 done
 
 # switches
@@ -51,11 +51,13 @@ done
 rem_groups=$sgroups
 for g1 in $sgroups; do
    rem_groups=`echo $rem_groups | cut -d' ' -f2-`
-   if [ `echo $rem_groups | wc -w` == 1 ]; then
+   if [ `echo $rem_groups | wc -w` == 0 ]; then
       continue
    fi
    for g2 in $rem_groups; do
-      echo "$g1 -- $g2 [penwidth=2, color=red];" >> derecho.desc
+      if [ $g1 != $g2 ]; then
+         echo "$g1 -- $g2 [penwidth=2, color=red];" >> derecho.desc
+      fi
    done
 done
 
@@ -94,7 +96,3 @@ circo -y -Tsvg -O derecho.desc
 
 # Post process SVG to move overlapping node labels
 julia -- svg_pp.jl
-
-# move the graph to the docs folder to view on GH pages
-mv derecho.desc.pp.svg docs/.
-
