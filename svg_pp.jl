@@ -51,6 +51,7 @@ function svg_pp()
    ellipse_ctr_rexp=r"cx=\"(-?[0-9]+\.?[0-9]*)\"\s+cy=\"(-?[0-9]+\.?[0-9]*)\""
    
    #-- loop through file and calculate displacement vectors for each node label
+   println("   post-processing pass 1 (move nodes and switch groups)")
    for (i,l) in enumerate(lines)
       # try to match various edge and node types 
       n2s_edge_m=match(node2switch_rexp,l)
@@ -70,24 +71,7 @@ function svg_pp()
          sfac=37/sqrt(dvec[1]^2+dvec[2]^2)
          sdvec[node]=sfac*dvec
          write(ofile,l*"\n")
-      elseif(sg2sg_edge_m!=nothing)
-         #println("Found an sg all-to-all edge: $l")
-         # find line between endpoints, and normalized perpendicular vector
-         #p1=str_to_vec(sg2sg_edge_m.captures[1])
-         #p2=str_to_vec(sg2sg_edge_m.captures[4])
-         #line=p1-p2
-         #perp=[line[2],-line[1]]
-         #perp=(500/sqrt(perp[1]^2+perp[2]^2))*perp
-         ## translate points in perpendicular direction, and output a new edge as a line
-         ## instead of a bezier curve
-         #new_p1 = p1-perp
-         #new_p2 = p2-perp
-         #new_edge = "<path fill=\"none\" stroke=\"red\" stroke-width=\"2\" d=\"M$(new_p1[1]),$(new_p1[2])L$(new_p2[1]),$(new_p2[2])\"/>"
-         #println("New edge: $new_edge")
-         ## Do nothing on first pass
-         write(ofile,l*"\n")
       elseif(lsg2sg_edge_m!=nothing)
-         println("Logical SG to SG edge: $(lsg2sg_edge_m.captures[1]), $(lsg2sg_edge_m.captures[2]) $(lsg2sg_edge_m.captures[3]) $(lsg2sg_edge_m.captures[4])")
          sgm=match(edge_sg_rexp,lines[i-1])
          sg=sgm.captures[1]
          p1=str_to_vec(lsg2sg_edge_m.captures[1])
@@ -100,13 +84,11 @@ function svg_pp()
          new_endpoint=old_endpoint-sdvec[sg]
          new_edge="<path fill=\"none\" stroke=\"red\" stroke-width=\"12\" d=\"M$(lsg2sg_edge_m.captures[1])L$(new_endpoint[1]),$(new_endpoint[2])\"/>"
          write(ofile,new_edge*"\n")
-         println("swith group $sg")
       elseif(node_m!=nothing)
          active_sdvec=sdvec[node_m.captures[1]]
          write(ofile,l*"\n")
       elseif(sg_m!=nothing)
          active_sdvec=sdvec[sg_m.captures[1]]
-         println("SG: $(sg_m.captures[1]), sdvec: $active_sdvec")
          write(ofile,l*"\n")
       elseif(node_box_m!=nothing) # move the box to the new location
          write(ofile,new_box(l,active_sdvec)*"\n")
@@ -118,11 +100,9 @@ function svg_pp()
          ne=new_ellipse(l,active_sdvec) 
          write(ofile,ne*"\n")
          # keep coordinates of new elipse center for 2nd pass
-         println("NE: $ne")
          el_ctr=match(ellipse_ctr_rexp,ne)
          new_coords_str="$(el_ctr.captures[1]),$(el_ctr.captures[2])"
          sg_new_coords[sg]=str_to_vec(new_coords_str)
-         println("switchGroup $sg, coords: $(sg_new_coords[sg])")
          move_text=true
       else
          if(move_text)
@@ -141,6 +121,7 @@ function svg_pp()
    lines=readlines(ifile)
    close(ifile)
    ofile=open("docs/derecho.desc.pp.svg","w")
+   println("   post-processing pass 2 (connect relocated switch groups)")
    for (i,l) in enumerate(lines)
       sg2sg_edge_m=match(sg2sg_rexp,l)
       if(sg2sg_edge_m!=nothing)
@@ -157,6 +138,7 @@ function svg_pp()
       end
    end
    close(ofile)
+   println("Final image rendered to docs/derecho.desc.pp.svg")
 end
 	   
 function str_to_vec(s::AbstractString)

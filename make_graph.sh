@@ -14,6 +14,7 @@ mindist=0.002
 EOF
 
 # Query PBS to get node and switch info
+echo "Querying topology info from Derecho PBS"
 ssh derecho.hpc.ucar.edu pbsnodes -a -F json | jq -r '.nodes[] | .resources_available | select(.host != null and .switch != null and .switchgroup != null) | .host + " " + .switch + " " + .switchgroup' > derecho-topo.txt
 cnodes=`cat derecho-topo.txt | awk '{print $1}' | grep dec`
 gnodes=`cat derecho-topo.txt | awk '{print $1}' | grep deg`
@@ -21,6 +22,7 @@ switches=`cat derecho-topo.txt | awk '{print $2}' | sort | uniq`
 sgroups=`cat derecho-topo.txt | awk '{print $3}' | sort | uniq`
 lsgroups=`cat derecho-topo.txt | awk '{print "log" $3}' | sort | uniq`
 
+echo "Parsing toplogy file and formatting for Graphviz"
 # CPU nodes
 for n in $cnodes; do
    echo "$n [shape=rect, color=blue, style=filled, fillcolor=white, label=\"$n\"];" >> derecho.desc
@@ -94,5 +96,6 @@ echo "}" >> derecho.desc
 # Now make the SVG graph
 circo -y -Tsvg -O derecho.desc
 
-# Post process SVG to move overlapping node labels
+# Post process SVG to improve the layout
+echo "Postprocessing SVG with Julia to improve layout"
 julia -- svg_pp.jl
